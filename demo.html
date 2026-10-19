@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>动态加载的页面</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background:#f3f4f6; color:#111; }
+    h2 { color:#2563eb; }
+    button { display:block; width:100%; padding:14px; margin:10px 0; font-size:16px;
+             border:none; border-radius:8px; background:#2563eb; color:#fff; }
+    pre { background:#fff; border:1px solid #ddd; border-radius:8px; padding:12px; white-space:pre-wrap; }
+  </style>
+</head>
+<body>
+  <h2>这个页面由动态加载的补丁创建</h2>
+  <p>本页在补丁 DEX 创建的 WebView 里显示。下面的按钮通过 JS 桥 <code>AndroidBridge</code> 调用原生能力(演示用,无害)。</p>
+
+  <button onclick="doToast()">调用原生 toast()</button>
+  <button onclick="showDevice()">获取设备信息 getDeviceInfo()</button>
+  <button onclick="saveAndRead()">setStorage / getStorage 往返</button>
+
+  <pre id="out">(输出)</pre>
+
+  <script>
+    function out(x){ document.getElementById('out').textContent =
+        (typeof x === 'string') ? x : JSON.stringify(x, null, 2); }
+
+    function doToast(){
+      if (window.AndroidBridge) { AndroidBridge.toast('来自网页的问候 👋'); out('已调用 toast'); }
+      else out('AndroidBridge 不存在(不在宿主里运行?)');
+    }
+    function showDevice(){
+      if (window.AndroidBridge) out(JSON.parse(AndroidBridge.getDeviceInfo()));
+      else out('AndroidBridge 不存在');
+    }
+    function saveAndRead(){
+      if (!window.AndroidBridge) { out('AndroidBridge 不存在'); return; }
+      AndroidBridge.setStorage('hello', 'world@' + Date.now());
+      out('读回: ' + AndroidBridge.getStorage('hello'));
+    }
+  </script>
+</body>
+</html>
